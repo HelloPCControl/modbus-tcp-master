@@ -1,0 +1,124 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="MAIN" Id="{ab1aef20-9c48-4672-b845-21e7a7912224}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+	// Device variables
+	devIPAddr			: STRING(15) := '192.168.3.40'; (* IP address of the target device *)
+	devUnitID			: BYTE := 1;			(* Identification number of a serial sub-network device *)
+
+	// Read Inputs
+	fbReadInputs		: FB_MBReadInputs;
+	readInputsQty		: WORD := 16; 			(* Number of digital inputs (bits) to be read *)
+    readInputsData		: ARRAY [1..2] OF BYTE;	(* Nunber of elements >= (readInputsQty + 7) / 8 *)
+	readInputsMBAddr	: WORD := 0;			(* Start address of the digital inputs to be read (bit offset) *)
+	readInputsCmd		: BOOL;
+	
+	// Read Inputs Registers
+	fbReadInputRegs		: FB_MBReadInputRegs;
+	readInputsRegsQty	: WORD := 5;			(* Number of input registers (words) to be read *)
+    readInputsRegsData	: ARRAY [1..5] OF WORD;	(* Nunber of elements >= readInputsRegsQty *)
+	readInputsRegsMBAddr: WORD := 0;			(* Start address of the input register to be read (word offset) *)
+	readInputsRegsCmd	: BOOL;
+	
+	// Write Single Coil
+	fbWriteSingleCoil	: FB_MBWriteSingleCoil;
+	writeSingleCoilMBAddr: WORD := 0;			(* Address of the digital output (bit offset) *)
+    writeSingleCoilData	: WORD := 16#FF00;		(* The value 16#FF00 switches the output on, 16#0000 switches it off *)
+	writeSingleCoilCmd	: BOOL;
+	
+	// Write Single Registers
+	fbWriteSingleReg	: FB_MBWriteSingleReg;
+	writeSingleRegMBAddr: WORD := 0;			(* Address of the output register (word offset) *);
+    writeSingleRegData	: WORD := 100;			(* Value to be written into the register *)
+	writeSingleRegCmd	: BOOL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Read Inputs
+fbReadInputs(
+	sIPAddr		:= devIPAddr,	
+	nTCPPort	:= MODBUS_TCP_PORT,	(* default is 502 *) 
+	nUnitID		:= devUnitID, 
+	nQuantity	:= readInputsQty, 
+	nMBAddr		:= readInputsMBAddr, 
+	cbLength	:= SIZEOF(readInputsData), 
+	pDestAddr	:= ADR(readInputsData), 
+	bExecute	:= readInputsCmd, 
+	tTimeout	:= , 
+	bBusy		=> , 
+	bError		=> , 
+	nErrId		=> , 
+	cbRead		=> );
+IF readInputsCmd = TRUE THEN
+	IF fbReadInputs.bBusy = FALSE OR fbReadInputs.bError = TRUE THEN
+		readInputsCmd := FALSE;
+	END_IF
+END_IF
+
+
+// Read Inputs Registers
+fbReadInputRegs(
+	sIPAddr		:= devIPAddr, 
+	nTCPPort	:= MODBUS_TCP_PORT,	(* default is 502 *) 
+	nUnitID		:= devUnitID, 
+	nQuantity	:= readInputsRegsQty, 
+	nMBAddr		:= readInputsRegsMBAddr, 
+	cbLength	:= SIZEOF(readInputsRegsData), 
+	pDestAddr	:= ADR(readInputsRegsData), 
+	bExecute	:= readInputsRegsCmd, 
+	tTimeout:= , 
+	bBusy=> , 
+	bError=> , 
+	nErrId=> , 
+	cbRead=> );
+IF readInputsRegsCmd = TRUE THEN
+	IF fbReadInputRegs.bBusy = FALSE OR fbReadInputRegs.bError = TRUE THEN
+		readInputsRegsCmd := FALSE;
+	END_IF
+END_IF
+
+
+// Write Single Coil
+fbWriteSingleCoil(
+	sIPAddr		:= devIPAddr, 
+	nTCPPort	:= MODBUS_TCP_PORT,	(* default is 502 *) 
+	nUnitID		:= devUnitID, 
+	nMBAddr		:= writeSingleCoilMBAddr, 
+	nValue		:= writeSingleCoilData, 
+	bExecute	:= writeSingleCoilCmd, 
+	tTimeout	:= , 
+	bBusy		=> , 
+	bError		=> , 
+	nErrId		=> );
+IF writeSingleCoilCmd = TRUE THEN
+	IF fbWriteSingleCoil.bBusy = FALSE OR fbWriteSingleCoil.bError = TRUE THEN
+		writeSingleCoilCmd := FALSE;
+	END_IF
+END_IF
+
+
+// Write Single Registers
+fbWriteSingleReg(
+	sIPAddr		:= devIPAddr, 
+	nTCPPort	:= MODBUS_TCP_PORT,	(* default is 502 *) 
+	nUnitID		:= devUnitID, 
+	nMBAddr		:= writeSingleRegMBAddr, 
+	nValue		:= writeSingleRegData, 
+	bExecute	:= writeSingleRegCmd, 
+	tTimeout	:= , 
+	bBusy		=> , 
+	bError		=> , 
+	nErrId		=> );
+IF writeSingleRegCmd = TRUE THEN
+	IF fbWriteSingleReg.bBusy = FALSE OR fbWriteSingleReg.bError = TRUE THEN
+		writeSingleRegCmd := FALSE;
+	END_IF
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="MAIN">
+      <LineId Id="38" Count="78" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
