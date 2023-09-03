@@ -27,7 +27,7 @@ VAR
     writeSingleCoilData	: WORD := 16#FF00;		(* The value 16#FF00 switches the output on, 16#0000 switches it off *)
 	writeSingleCoilCmd	: BOOL;
 	
-	// Write Single Registers
+	// Write Single Register
 	fbWriteSingleReg	: FB_MBWriteSingleReg;
 	writeSingleRegMBAddr: WORD := 0;			(* Address of the output register (word offset) *);
     writeSingleRegData	: WORD := 100;			(* Value to be written into the register *)
@@ -98,7 +98,7 @@ IF writeSingleCoilCmd = TRUE THEN
 END_IF
 
 
-// Write Single Registers
+// Write Single Register
 fbWriteSingleReg(
 	sIPAddr		:= devIPAddr, 
 	nTCPPort	:= MODBUS_TCP_PORT,	(* default is 502 *) 
